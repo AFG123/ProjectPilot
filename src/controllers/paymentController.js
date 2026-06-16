@@ -142,6 +142,9 @@ async function handleWebhook(req, res) {
   const expBuf = Buffer.from(expected);
   const valid = sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf);
   if (!valid) {
+    // The #1 misconfig: the secret here doesn't match the one in the Razorpay
+    // dashboard. Log it loudly so it's obvious in the Railway logs.
+    console.warn('[webhook] SIGNATURE MISMATCH — RAZORPAY_WEBHOOK_SECRET does not match the Razorpay dashboard secret');
     return res.status(400).json({ error: 'Invalid webhook signature' });
   }
 
@@ -151,6 +154,8 @@ async function handleWebhook(req, res) {
   } catch {
     return res.status(400).json({ error: 'Malformed webhook body' });
   }
+
+  console.log(`[webhook] received & signature OK — event: ${event.event}`);
 
   // We only act on a successful capture. We stamped the order with the userId in
   // `notes` at create-order time, so we know who to unlock.
@@ -169,6 +174,7 @@ async function handleWebhook(req, res) {
         );
         await client.query(`UPDATE users SET is_paid = true WHERE id = $1`, [userId]);
         await client.query('COMMIT');
+        console.log(`[webhook] unlocked user ${userId} for payment ${payment.id}`);
       } catch (err) {
         await client.query('ROLLBACK').catch(() => {});
         console.error('Webhook DB error:', err.message);
