@@ -23,6 +23,12 @@ function getRazorpay() {
 // Step 1 of the flow: ask Razorpay to open an order for ₹49, hand the id back
 // to the browser so it can launch checkout.
 async function createOrder(req, res) {
+  // Fail loudly (in the logs) if the keys aren't configured — the single most
+  // common cause of a create-order 500 in a fresh deployment.
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    console.error('[create-order] RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET is not set in this environment');
+    return res.status(500).json({ error: 'Payments are not configured. Please try again later.' });
+  }
   try {
     const order = await getRazorpay().orders.create({
       amount: UNLOCK_AMOUNT_PAISE,
@@ -38,7 +44,9 @@ async function createOrder(req, res) {
       keyId: process.env.RAZORPAY_KEY_ID, // public key — safe to send to the browser
     });
   } catch (err) {
-    console.error('Create order error:', err.message);
+    // Razorpay puts the useful detail in err.error.description / err.statusCode,
+    // not always err.message — log all of it so the real cause is visible.
+    console.error('[create-order] Razorpay error:', err?.statusCode, err?.error?.description || err?.message || err);
     return res.status(500).json({ error: 'Could not start payment. Please try again.' });
   }
 }
