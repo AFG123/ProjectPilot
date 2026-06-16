@@ -1,4 +1,0 @@
-# SPA fallback: serve index.html for any path that isn't a real static file,
-# so client-side routes (/terms, /privacy, /generate, ...) work on direct load
-# and refresh instead of 404ing. The 200 keeps the URL intact (rewrite, not redirect).
-/*    /index.html   200

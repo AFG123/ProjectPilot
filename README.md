@@ -112,8 +112,9 @@ npm run dev                 # starts on http://localhost:5173
 
 ## Deployment
 
-- **Frontend** → Cloudflare Pages (build `npm run build`, output `dist`, root `client`).
-  SPA routing is handled by `client/public/_redirects`.
+- **Frontend** → Cloudflare (build `npm run build`, output `dist`, root `client`).
+  Deployed as a Worker with static assets; SPA routing is handled by the Worker's
+  `not_found_handling: "single-page-application"` setting.
 - **Backend** → Railway. Set the env vars above with `NODE_ENV=production`.
 - Register the Razorpay webhook (`payment.captured`) to `POST /api/payment/webhook`
   and set `RAZORPAY_WEBHOOK_SECRET`.
