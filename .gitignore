@@ -1,0 +1,29 @@
+# ─── Dependencies ───
+node_modules/
+
+# ─── Secrets / env (NEVER commit) ───
+# The bare `.env` / `.env.*` patterns match at any depth, so this covers both
+# the root and client/ env files. The two examples are the only ones tracked.
+.env
+.env.*
+!.env.example
+!client/.env.example
+
+# ─── Build output ───
+dist/
+build/
+client/dist/
+
+# ─── Logs ───
+*.log
+npm-debug.log*
+
+# ─── Internal docs (kept local, not published) ───
+# PRD, planning, and handoff notes live on disk but stay out of the repo.
+docs/
+
+# ─── OS / editor cruft ───
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
