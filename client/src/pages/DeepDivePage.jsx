@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Zap, Loader2, FolderOpen, ListOrdered, Globe, Database, AlertTriangle, MessageSquare, Clock, ChevronDown, ChevronUp, GraduationCap, Terminal, CheckCircle2, AlertCircle, Search, Lock } from 'lucide-react';
+import { ArrowLeft, Zap, Loader2, FolderOpen, ListOrdered, Globe, Database, AlertTriangle, MessageSquare, Clock, ChevronDown, ChevronUp, GraduationCap, Terminal, CheckCircle2, AlertCircle, Search, Lock, Copy, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from '../components/AuthModal';
 import UnlockButton from '../components/UnlockButton';
@@ -18,16 +18,83 @@ function writeLocalDeepDive(name, data) {
 }
 
 // Small mono code block used for setup commands and per-step snippets.
+// The header row always renders so the copy button has a home even when there's
+// no file label. Copy uses the native clipboard API — no dependency needed.
 function CodeBlock({ file, snippet }) {
+  const [copied, setCopied] = useState(false);
   if (!snippet) return null;
+
+  const copy = () => {
+    navigator.clipboard?.writeText(snippet)
+      .then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); })
+      .catch(() => { /* clipboard blocked — no-op */ });
+  };
+
   return (
     <div className="rounded-lg border border-surface-border bg-black/40 overflow-hidden">
-      {file && (
-        <div className="px-3 py-1.5 border-b border-surface-border text-xs font-mono text-slate-500">{file}</div>
-      )}
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-surface-border">
+        <span className="text-xs font-mono text-slate-500 truncate">{file || 'snippet'}</span>
+        <button
+          onClick={copy}
+          aria-label={copied ? 'Copied' : 'Copy code'}
+          className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-200 transition-colors flex-shrink-0"
+        >
+          {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
       <pre className="p-3 overflow-x-auto text-xs leading-relaxed">
         <code className="font-mono text-slate-200 whitespace-pre">{snippet}</code>
       </pre>
+    </div>
+  );
+}
+
+// Safety net: the model is *supposed* to put code only in `step.code`, but it
+// occasionally dumps a fenced ```code block``` into the `how` steps instead —
+// sometimes as one multi-line item, sometimes split across several array items.
+// Joining the items and splitting on ``` fences reconstructs the original text
+// either way, so we can lift code into a real CodeBlock and keep the rest as
+// readable prose. Returns null when there's no fence (caller renders a clean <ol>).
+function parseHow(how) {
+  const joined = how.join('\n');
+  if (!joined.includes('```')) return null;
+
+  const blocks = [];
+  joined.split('```').forEach((part, i) => {
+    if (i % 2 === 1) {
+      // Inside a fence. The first line may be a bare language hint (e.g. "javascript").
+      const lines = part.replace(/^\n/, '').split('\n');
+      if (lines.length > 1 && /^[a-zA-Z0-9+#-]+$/.test(lines[0].trim())) lines.shift();
+      const code = lines.join('\n').replace(/\s+$/, '');
+      if (code.trim()) blocks.push({ type: 'code', value: code });
+    } else {
+      const text = part.trim();
+      if (text) blocks.push({ type: 'text', value: text });
+    }
+  });
+  return blocks;
+}
+
+// Renders the per-step `how` instructions. Normal case → a clean numbered list.
+// If the model embedded a code fence, render the prose as text + code as CodeBlock.
+function HowSteps({ how }) {
+  const blocks = parseHow(how);
+  if (!blocks) {
+    return (
+      <ol className="space-y-1.5 list-decimal list-inside marker:text-slate-600">
+        {how.map((h, i) => (
+          <li key={i} className="text-sm text-slate-400 leading-relaxed">{h}</li>
+        ))}
+      </ol>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      {blocks.map((b, i) => b.type === 'code'
+        ? <CodeBlock key={i} snippet={b.value} />
+        : <p key={i} className="text-sm text-slate-400 leading-relaxed whitespace-pre-line">{b.value}</p>
+      )}
     </div>
   );
 }
@@ -71,13 +138,7 @@ function BuildStep({ step, defaultOpen }) {
           <p className="text-sm text-slate-300 leading-relaxed">{step.what_to_build}</p>
 
           {/* How — concrete sub-steps / commands */}
-          {step.how?.length > 0 && (
-            <ol className="space-y-1.5 list-decimal list-inside marker:text-slate-600">
-              {step.how.map((h, i) => (
-                <li key={i} className="text-sm text-slate-400 leading-relaxed">{h}</li>
-              ))}
-            </ol>
-          )}
+          {step.how?.length > 0 && <HowSteps how={step.how} />}
 
           {/* Code — the hard 20% they can't guess */}
           {step.code?.snippet && <CodeBlock file={step.code.file} snippet={step.code.snippet} />}

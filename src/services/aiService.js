@@ -249,11 +249,11 @@ Return JSON with this EXACT structure:
       "estimated_time": "realistic for a ${experienceLevel}, e.g. '2-3 hours'",
       "goal": "one line: what concretely works after this step is done",
       "what_to_build": "specific description of what to create in this step",
-      "how": ["concrete sub-steps or terminal commands, in order"],
-      "code": { "file": "path/to/file", "snippet": "a SHORT code snippet (5-15 lines) for the TRICKIEST part of THIS step only — the pattern they can't guess. NOT the whole file. Use null if the step genuinely needs no code." },
+      "how": ["plain-English instructions and terminal commands ONLY, in order. NEVER put multi-line source code or ``` fences here — all code goes in the 'code' field below."],
+      "code": { "file": "path/to/file", "snippet": "a SHORT code snippet (max ~12 lines) for the TRICKIEST part of THIS step only — the pattern they can't guess. NOT the whole file. No ``` fences. Use null if the step genuinely needs no code." },
       "concepts": [ { "term": "name", "explain": "one plain-English line a total beginner understands" } ],
       "verify": "exactly how to confirm this step works — a command to run or button to click + what they should see (their definition of done)",
-      "if_stuck": "the single most common error on this step + the fix",
+      "if_stuck": "the 1-2 most common errors on this step + the exact fix for each, and what to search if they're still stuck",
       "files_involved": ["file paths touched in this step"]
     }
   ],
@@ -272,7 +272,7 @@ RULES:
 - setup: this is step zero — get them from an empty folder to a running skeleton. Be exact with commands.
 - build_order: 6-8 steps, each finishable in one sitting, totalling roughly ${timeAvailable}. Order them so the student ALWAYS has something runnable — setup, then ONE tiny end-to-end slice, then expand.
 - Be concrete, never vague: not "set up authentication" but "create POST /api/auth/register that hashes the password with bcrypt and inserts a row into the users table".
-- "code.snippet" is the single highest-value field — give the hard 20% they can't easily guess, keep it short, and only where it genuinely helps (null otherwise).
+- "code.snippet" is the single highest-value field — give the hard 20% they can't easily guess, keep it short (max ~12 lines), and only where it genuinely helps (null otherwise). ALL code must live here, never inside "how". Put the WORDS in "how" and the CODE in "code".
 - "concepts" MUST explain every new term you introduce (bcrypt, JWT, WebSocket, middleware, etc.) in plain English. For an advanced student you may keep them brief.
 - "verify" must be something they can actually run or click — give them a definition of done for every step.
 - Calibrate detail to a ${experienceLevel}: more hand-holding, concepts, and snippets for beginners; terser for advanced.
