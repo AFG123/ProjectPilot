@@ -39,7 +39,15 @@ function setAuthCookie(res, token) {
 }
 
 function clearAuthCookie(res) {
+  // Clear the current, domain-scoped cookie.
   res.clearCookie(COOKIE_NAME, authCookieOptions());
+  // Also clear the LEGACY host-only cookie (set before we added Domain=.devbyaryan.me).
+  // The browser keys cookies by name+domain+path, so the line above — which carries
+  // a Domain — does NOT match a host-only cookie. Without this, anyone who logged in
+  // before the Domain change stays signed in after clicking "Sign out".
+  if (isProd) {
+    res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: true, sameSite: 'none', path: '/' });
+  }
 }
 
 module.exports = { COOKIE_NAME, signAuthToken, setAuthCookie, clearAuthCookie };
