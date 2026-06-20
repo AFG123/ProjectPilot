@@ -361,6 +361,23 @@ export default function GeneratePage() {
 
             {projects.length > 0 && (
               <div className="space-y-3">
+                {/* Guest notice — generations aren't saved for signed-out users.
+                    Honest heads-up + gentle nudge to sign in (opens AuthModal). */}
+                {!user && (
+                  <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-brand-500/8 border border-brand-500/20">
+                    <span className="text-base leading-none mt-0.5">👋</span>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      You're browsing as a guest — these ideas won't be saved.{' '}
+                      <button
+                        onClick={() => setShowAuth(true)}
+                        className="text-brand-400 font-medium hover:text-brand-300 underline underline-offset-2 transition-colors"
+                      >
+                        Sign in
+                      </button>{' '}
+                      to keep them and claim your free deep dive.
+                    </p>
+                  </div>
+                )}
                 {/* Skill gap callout — shown when AI identified missing skills */}
                 {skillGap && (
                   <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-500/8 border border-amber-500/20">
