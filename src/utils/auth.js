@@ -17,13 +17,19 @@ function signAuthToken({ sub, userId, name, email, picture, isPaid }) {
 // body the frontend stores in localStorage.
 //   httpOnly → JavaScript can't read it, so an XSS bug can't steal the session
 //   secure   → only transmitted over HTTPS (production only; localhost is http)
-//   sameSite → 'lax' in dev (same-site localhost). In prod the frontend (Vercel)
-//              and API (Railway) are different sites, so 'none' + secure is required.
+//   sameSite → 'lax' everywhere. The frontend (projectpilot.devbyaryan.me) and API
+//              (api.devbyaryan.me) are subdomains of the SAME site (devbyaryan.me),
+//              so cross-subdomain requests are same-site and Lax cookies ride along.
+//              (The old 'none' was needed when they were different sites; mobile
+//              browsers treat SameSite=None as third-party and DROP it.)
+//   domain   → '.devbyaryan.me' in prod makes it a first-party cookie shared across
+//              both subdomains, so mobile keeps it. (undefined in dev = localhost.)
 function authCookieOptions() {
   return {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    sameSite: 'lax',
+    domain: isProd ? '.devbyaryan.me' : undefined,
     path: '/',
   };
 }
