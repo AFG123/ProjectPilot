@@ -109,10 +109,13 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <button className="md:hidden text-slate-400" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {/* Mobile: avatar (when logged in) + menu button */}
+          <div className="md:hidden flex items-center gap-3">
+            {user && <Avatar user={user} />}
+            <button className="text-slate-400" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile menu */}
@@ -121,7 +124,18 @@ export default function Navbar() {
             <button onClick={() => goToSection('how-it-works')} className="text-sm text-slate-400 text-left">How it works</button>
             <button onClick={() => goToSection('pricing')} className="text-sm text-slate-400 text-left">Pricing</button>
             {user ? (
-              <button onClick={() => { navigate('/generate'); setMenuOpen(false); }} className="text-sm font-medium px-4 py-2 rounded-lg bg-brand-500 text-white">Generate</button>
+              <>
+                <div className="flex items-center gap-3 pb-1">
+                  <Avatar user={user} />
+                  <div className="min-w-0">
+                    <p className="text-sm text-white font-medium truncate">{user.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                  </div>
+                </div>
+                <NavLink to="/saved" onClick={() => setMenuOpen(false)} className="text-sm text-slate-400 text-left">My Projects</NavLink>
+                <button onClick={() => { navigate('/generate'); setMenuOpen(false); }} className="text-sm font-medium px-4 py-2 rounded-lg bg-brand-500 text-white">Generate</button>
+                <button onClick={() => { logout(); setMenuOpen(false); }} className="text-sm text-slate-400 text-left">Sign out</button>
+              </>
             ) : (
               <button onClick={() => { setShowAuth(true); setMenuOpen(false); }} className="text-sm font-medium px-4 py-2 rounded-lg bg-brand-500 text-white">Get Started Free</button>
             )}
