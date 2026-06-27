@@ -47,7 +47,7 @@ export default function UnlockButton({ label = 'Unlock all deep dives · ₹49',
         name: 'ProjectPilot',
         description: 'Unlock all project deep dives',
         prefill: { name: user?.name, email: user?.email },
-        theme: { color: '#6366f1' },
+        theme: { color: '#7c5cff' },
         // 3 + 4. Razorpay hands back the signed receipt → we verify server-side.
         handler: async (response) => {
           try {
@@ -89,7 +89,7 @@ export default function UnlockButton({ label = 'Unlock all deep dives · ₹49',
       <button
         onClick={handleUnlock}
         disabled={loading}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/30"
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-full transition-opacity shadow-lg shadow-brand-500/30"
       >
         {loading ? <><Loader2 size={14} className="animate-spin" /> Processing…</> : <><Lock size={14} /> {label}</>}
       </button>

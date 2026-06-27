@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Zap, ArrowLeft, Mail, Phone, MapPin } from 'lucide-react';
 
@@ -16,6 +17,7 @@ const BUSINESS = {
 
 // Shared page chrome so all four pages look identical and professional.
 function LegalLayout({ title, children }) {
+  useEffect(() => { document.title = `${title} · ProjectPilot`; }, [title]);
   return (
     <div className="min-h-screen bg-surface pt-20">
       <div className="max-w-3xl mx-auto px-4 py-12">
@@ -24,13 +26,13 @@ function LegalLayout({ title, children }) {
         </Link>
 
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center">
             <Zap size={12} className="text-white" />
           </div>
-          <span className="text-sm font-medium text-white">Project<span className="text-brand-400">Pilot</span></span>
+          <span className="text-sm font-medium text-white">Project<span className="duo-text">Pilot</span></span>
         </div>
 
-        <h1 className="text-3xl font-bold text-white mb-1.5">{title}</h1>
+        <h1 className="font-display text-3xl font-bold text-white tracking-tight mb-1.5">{title}</h1>
         <p className="text-xs text-slate-500 mb-10">Last updated: {BUSINESS.updated}</p>
 
         <div className="space-y-8">{children}</div>
@@ -48,7 +50,7 @@ function LegalLayout({ title, children }) {
 
 // Small typographic helpers — keep the prose consistent across pages.
 function H2({ children }) {
-  return <h2 className="text-base font-semibold text-white mb-3">{children}</h2>;
+  return <h2 className="font-display text-base font-semibold text-white mb-3">{children}</h2>;
 }
 function P({ children }) {
   return <p className="text-sm text-slate-400 leading-relaxed">{children}</p>;
@@ -329,7 +331,7 @@ export function ContactPage() {
       <div className="space-y-3">
         {rows.map((r) => (
           <div key={r.label} className="flex items-center gap-4 glass-card rounded-xl p-4">
-            <div className="w-9 h-9 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500/30 to-accent-500/20 border border-white/10 flex items-center justify-center flex-shrink-0">
               {r.icon}
             </div>
             <div className="min-w-0">

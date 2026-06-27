@@ -41,11 +41,11 @@ export default function AuthModal({ onClose }) {
 
         {/* Logo */}
         <div className="flex flex-col items-center gap-4 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
             <Zap size={22} className="text-white" />
           </div>
           <div className="text-center">
-            <h2 className="text-white text-xl font-semibold">Welcome to ProjectPilot</h2>
+            <h2 className="font-display text-white text-xl font-semibold tracking-tight">Welcome to ProjectPilot</h2>
             <p className="text-slate-400 text-sm mt-1">Sign in to claim your free project deep dive</p>
           </div>
         </div>
