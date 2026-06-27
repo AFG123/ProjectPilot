@@ -23,6 +23,25 @@ async function main() {
   await pool.query(`CREATE INDEX IF NOT EXISTS payments_user_id_idx ON payments(user_id);`);
 
   console.log('✓ payments table ready');
+
+  // Global response cache for the 5-ideas generation. Keyed by a sha256 of the
+  // NORMALIZED inputs (skills+levels, role, company, time), shared across ALL
+  // users so identical requests reuse one Gemini call instead of paying for it
+  // again. cache_key is UNIQUE → that index is also our lookup index. Freshness
+  // is handled at read time (14-day TTL via created_at), so no cron/cleanup job.
+  // Distinct from `generations`, which is each user's personal history.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS generation_cache (
+      id          SERIAL PRIMARY KEY,
+      cache_key   TEXT UNIQUE NOT NULL,
+      projects    JSONB NOT NULL,
+      skill_gap   TEXT,
+      hit_count   INTEGER NOT NULL DEFAULT 0,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+  `);
+
+  console.log('✓ generation_cache table ready');
   await pool.end();
 }
 

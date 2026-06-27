@@ -1,11 +1,9 @@
 const pdfParse = require('pdf-parse');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel(
-  { model: 'gemini-2.5-flash-lite' },
-  { apiVersion: 'v1' }
-);
+// Shared Gemini client — single source of truth for key/model/apiVersion.
+const gemini = require('./geminiClient');
+// Reuse the robust AI-JSON parser (handles fences, preamble, raw newlines in
+// strings, trailing commas) instead of a brittle JSON.parse.
+const { parseAIJson } = require('./aiService');
 
 // Step 1: PDF buffer → raw text
 // pdf-parse reads the binary buffer multer gives us and returns plain text.
@@ -72,17 +70,21 @@ async function extractSkillsFromResume(buffer, targetRole) {
   const resumeText = await extractTextFromPDF(buffer);
   const prompt = buildExtractionPrompt(resumeText, targetRole);
 
-  const result = await model.generateContent({
+  const result = await gemini.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       temperature: 0.3, // low temp — extraction should be factual, not creative
-      maxOutputTokens: 1024,
+      // gemini-2.5-flash is a THINKING model: it spends output tokens on internal
+      // reasoning BEFORE the answer. 1024 was fine on flash-lite but flash's
+      // thinking exhausted it (finishReason MAX_TOKENS) and truncated the JSON.
+      // 4096 leaves room for thinking + the full JSON. (thinkingConfig to disable
+      // thinking is rejected on the v1 endpoint, so headroom is the only lever.)
+      maxOutputTokens: 4096,
     },
   });
 
   const raw = result.response.text();
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-  const parsed = JSON.parse(cleaned);
+  const parsed = parseAIJson(raw);
 
   return {
     skills:       parsed.skills       || [],

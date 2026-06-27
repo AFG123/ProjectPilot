@@ -1,12 +1,6 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// gemini-2.5-flash-lite on v1 — works with this key type (other models have quota issues)
-const model = genAI.getGenerativeModel(
-  { model: 'gemini-2.5-flash-lite' },
-  { apiVersion: 'v1' }
-);
+// All Gemini setup (key, model name, apiVersion) lives in geminiClient — the
+// single source of truth. Task 3 (key rotation) plugs in there, not here.
+const gemini = require('./geminiClient');
 
 // Maps timeAvailable string to a rough hours budget so the prompt can calibrate
 function parseTimeBudget(timeAvailable) {
@@ -162,20 +156,38 @@ function isTransient(err) {
     /overload|unavailable|temporarily|timeout|ECONNRESET|ETIMEDOUT|fetch failed|network/i.test(m);
 }
 
+// Gemini blocks a response with "RECITATION" when it judges the output too close
+// to training material. It's content-based and NON-deterministic — re-sending the
+// same request usually samples a completion that isn't blocked. So we re-roll once.
+function isRecitation(err) {
+  return /RECITATION/i.test(String(err?.message || ''));
+}
+
 // Wrap a generateContent call with exponential backoff so a single Gemini 503
 // (their servers momentarily busy) doesn't surface to the user as a hard failure.
 async function generateWithRetry(request, { retries = 2, baseDelay = 700 } = {}) {
-  let lastErr;
-  for (let attempt = 0; attempt <= retries; attempt++) {
+  let transientAttempt = 0;       // counts transient retries only (drives the backoff)
+  let usedRecitationReroll = false; // RECITATION gets exactly one immediate re-roll
+
+  while (true) {
     try {
-      return await model.generateContent(request);
+      return await gemini.generateContent(request);
     } catch (err) {
-      lastErr = err;
-      if (!isTransient(err) || attempt === retries) throw err;
-      await new Promise((r) => setTimeout(r, baseDelay * 2 ** attempt)); // 700ms, 1400ms
+      // RECITATION: re-send once immediately (no delay — it's content, not load).
+      // Doesn't spend a transient attempt.
+      if (isRecitation(err) && !usedRecitationReroll) {
+        usedRecitationReroll = true;
+        continue;
+      }
+      // Transient server/network blips: exponential backoff (700ms, 1400ms), up to `retries`.
+      if (isTransient(err) && transientAttempt < retries) {
+        await new Promise((r) => setTimeout(r, baseDelay * 2 ** transientAttempt));
+        transientAttempt++;
+        continue;
+      }
+      throw err;
     }
   }
-  throw lastErr;
 }
 
 async function generateProjects(userInput) {
@@ -297,4 +309,6 @@ async function generateDeepDive(input) {
   return parseAIJson(raw);
 }
 
-module.exports = { generateProjects, generateDeepDive };
+// parseAIJson is exported so the resume-extraction path reuses the SAME robust
+// parser (extractJSON + repairJson fallback) instead of a fragile JSON.parse.
+module.exports = { generateProjects, generateDeepDive, parseAIJson };
