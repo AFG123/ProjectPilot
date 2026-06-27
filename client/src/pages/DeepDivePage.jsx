@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Zap, Loader2, FolderOpen, ListOrdered, Globe, Database, AlertTriangle, MessageSquare, Clock, ChevronDown, ChevronUp, GraduationCap, Terminal, CheckCircle2, AlertCircle, Search, Lock, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Zap, Loader2, FolderOpen, ListOrdered, Globe, Database, AlertTriangle, MessageSquare, Clock, ChevronDown, ChevronUp, GraduationCap, Terminal, CheckCircle2, AlertCircle, Search, Lock, Copy, Check, Lightbulb } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from '../components/AuthModal';
 import UnlockButton from '../components/UnlockButton';
@@ -110,16 +110,17 @@ const METHOD_COLORS = {
 // Each build step is collapsible — users can focus on the current step
 function BuildStep({ step, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen);
+  const [showWhy, setShowWhy] = useState(false);
   return (
     <div className="border border-surface-border rounded-xl overflow-hidden">
       <button
         className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02] transition-colors"
         onClick={() => setOpen(!open)}
       >
-        <span className="w-6 h-6 rounded-full bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-xs font-bold text-brand-400 flex-shrink-0">
+        <span className="w-6 h-6 rounded-full bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
           {step.step}
         </span>
-        <span className="text-sm font-medium text-white flex-1">{step.title}</span>
+        <span className="font-display text-sm font-semibold text-white flex-1">{step.title}</span>
         <span className="text-xs text-slate-600 mr-2 flex items-center gap-1">
           <Clock size={11} /> {step.estimated_time}
         </span>
@@ -151,6 +152,25 @@ function BuildStep({ step, defaultOpen }) {
                   <span className="text-brand-400 font-medium font-mono">{c.term}</span> — {c.explain}
                 </p>
               ))}
+            </div>
+          )}
+
+          {/* Why this works — the underlying mechanism. Optional + selective from
+              the model; collapsed by default so it never adds noise to a step that
+              doesn't have it. Distinct from `concepts` (which just names terms). */}
+          {step.why_it_works && (
+            <div className="rounded-lg bg-brand-500/[0.06] border border-brand-500/20 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowWhy(!showWhy)}
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left"
+              >
+                <span className="flex items-center gap-1.5 text-xs font-medium text-brand-200">
+                  <Lightbulb size={12} className="text-brand-400" /> Why this works
+                </span>
+                {showWhy ? <ChevronUp size={12} className="text-slate-500 flex-shrink-0" /> : <ChevronDown size={12} className="text-slate-500 flex-shrink-0" />}
+              </button>
+              {showWhy && <p className="px-3 pb-2.5 text-xs text-slate-300 leading-relaxed">{step.why_it_works}</p>}
             </div>
           )}
 
@@ -189,10 +209,10 @@ function Section({ icon, title, children }) {
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-7 h-7 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400">
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500/30 to-accent-500/20 border border-white/10 flex items-center justify-center text-brand-100">
           {icon}
         </div>
-        <h2 className="text-sm font-semibold text-white">{title}</h2>
+        <h2 className="font-display text-base font-semibold text-white">{title}</h2>
       </div>
       {children}
     </div>
@@ -226,6 +246,11 @@ export default function DeepDivePage() {
       navigate('/generate');
     }
   }, [index, navigate]);
+
+  // Per-page title for the tab + SEO, set once the project name is known.
+  useEffect(() => {
+    if (project?.name) document.title = `${project.name} · ProjectPilot`;
+  }, [project]);
 
   // Once project + profile are loaded (and auth has resolved), call the backend.
   // The deep dive now requires sign-in, and non-paid users get 1 free one — so we
@@ -303,7 +328,7 @@ export default function DeepDivePage() {
           </Link>
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-2xl font-bold text-white leading-snug">{project.name}</h1>
+              <h1 className="font-display text-2xl font-bold text-white leading-snug tracking-tight">{project.name}</h1>
               <p className="text-slate-400 text-sm mt-2 max-w-2xl leading-relaxed">{project.description}</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -333,20 +358,20 @@ export default function DeepDivePage() {
         {/* Locked tease — guest must sign in, or a free user has used their 1 free deep dive */}
         {locked && !loading && (
           <div className="glass-card rounded-2xl p-8 sm:p-10 text-center max-w-xl mx-auto">
-            <div className="w-12 h-12 rounded-2xl bg-brand-500/15 border border-brand-500/30 flex items-center justify-center mx-auto mb-5">
-              <Lock size={20} className="text-brand-400" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500/30 to-accent-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5">
+              <Lock size={20} className="text-brand-100" />
             </div>
 
             {locked.reason === 'auth' ? (
               <>
-                <h2 className="text-lg font-bold text-white mb-1.5">Your first deep dive is free</h2>
+                <h2 className="font-display text-lg font-bold text-white mb-1.5">Your first deep dive is free</h2>
                 <p className="text-sm text-slate-400 mb-6 leading-relaxed">
                   Sign in to unlock the full build plan for <span className="text-slate-200 font-medium">{project.name}</span> — no payment needed for your first one.
                 </p>
               </>
             ) : (
               <>
-                <h2 className="text-lg font-bold text-white mb-1.5">You've used your free deep dive</h2>
+                <h2 className="font-display text-lg font-bold text-white mb-1.5">You've used your free deep dive</h2>
                 <p className="text-sm text-slate-400 mb-6 leading-relaxed">
                   Unlock the full build plan for <span className="text-slate-200 font-medium">every</span> project — one-time ₹49, forever.
                 </p>
@@ -374,7 +399,7 @@ export default function DeepDivePage() {
             {locked.reason === 'auth' ? (
               <button
                 onClick={() => setShowAuth(true)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/30"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 text-white text-sm font-semibold rounded-full transition-opacity shadow-lg shadow-brand-500/30"
               >
                 Sign in — first deep dive free
               </button>
