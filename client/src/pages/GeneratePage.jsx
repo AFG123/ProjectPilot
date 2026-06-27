@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Plus, X, Loader2, ChevronDown, Zap, ArrowRight, Upload, FileText, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -33,6 +33,8 @@ export default function GeneratePage() {
   const [extractError, setExtractError] = useState('');
   const [extracted, setExtracted] = useState(false); // true after successful extraction
   const fileInputRef = useRef(null);
+
+  useEffect(() => { document.title = 'Generate Projects · ProjectPilot'; }, []);
 
   function addSkill() {
     if (skills.length < 6) setSkills([...skills, { name: '', level: 'intermediate' }]);
@@ -121,7 +123,7 @@ export default function GeneratePage() {
           <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors mb-6">
             <Zap size={12} /> ProjectPilot
           </Link>
-          <h1 className="text-3xl font-bold text-white">Generate your projects</h1>
+          <h1 className="font-display text-3xl font-bold text-white tracking-tight">Generate your projects</h1>
           <p className="text-slate-400 mt-1.5 text-sm">Fill in your profile and get 5 tailored project ideas in seconds.</p>
         </div>
 
@@ -138,7 +140,7 @@ export default function GeneratePage() {
                   onClick={() => { setInputMode(mode); setExtractError(''); }}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-medium transition-all ${
                     inputMode === mode
-                      ? 'bg-brand-500 text-white shadow'
+                      ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow'
                       : 'text-slate-500 hover:text-slate-300'
                   }`}
                 >
@@ -333,7 +335,7 @@ export default function GeneratePage() {
             <button
               type="submit"
               disabled={loading || !skills.some(s => s.name.trim()) || !targetRole}
-              className="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/25"
+              className="w-full py-3 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/25"
             >
               {loading ? <><Loader2 size={16} className="animate-spin" /> Generating…</> : 'Generate 5 Projects'}
             </button>
@@ -343,8 +345,8 @@ export default function GeneratePage() {
           <div>
             {!projects.length && !loading && (
               <div className="glass-card rounded-2xl p-10 text-center border-dashed">
-                <div className="w-12 h-12 rounded-xl bg-brand-500/10 flex items-center justify-center mx-auto mb-4">
-                  <Zap size={22} className="text-brand-400" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500/30 to-accent-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Zap size={22} className="text-brand-100" />
                 </div>
                 <p className="text-sm font-medium text-white mb-1">Your projects will appear here</p>
                 <p className="text-xs text-slate-500">Fill in your profile and click Generate</p>
@@ -393,7 +395,7 @@ export default function GeneratePage() {
                     className="glass-card rounded-2xl p-5 hover:border-brand-500/40 transition-all cursor-pointer group"
                   >
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <h3 className="text-sm font-semibold text-white leading-snug group-hover:text-brand-400 transition-colors">{p.name}</h3>
+                      <h3 className="font-display text-base font-semibold text-white leading-snug group-hover:text-brand-400 transition-colors">{p.name}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${DIFF_COLORS[p.difficulty] || 'text-slate-400 bg-white/5'}`}>
                         {p.difficulty}
                       </span>
@@ -427,7 +429,7 @@ export default function GeneratePage() {
                       <p className="text-xs text-slate-500 mb-3">Open any project for a full build plan. Sign in to claim your <span className="text-brand-400 font-medium">first deep dive free</span>.</p>
                       <button
                         onClick={() => setShowAuth(true)}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/30"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 text-white text-sm font-semibold rounded-full transition-opacity shadow-lg shadow-brand-500/30"
                       >
                         Sign in — first deep dive free
                       </button>
