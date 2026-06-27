@@ -73,11 +73,11 @@ export default function Navbar() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
               <Zap size={16} className="text-white" />
             </div>
             <span className="text-white font-semibold text-lg tracking-tight">
-              Project<span className="text-brand-400">Pilot</span>
+              Project<span className="duo-text">Pilot</span>
             </span>
           </Link>
 
@@ -97,7 +97,7 @@ export default function Navbar() {
                 </NavLink>
                 <button
                   onClick={() => navigate('/generate')}
-                  className="text-sm font-medium px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-600 text-white transition-colors"
+                  className="text-sm font-medium px-4 py-2 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 text-white transition-opacity"
                 >
                   Generate
                 </button>
@@ -120,7 +120,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={() => setShowAuth(true)}
-                className="text-sm font-medium px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-600 text-white transition-colors shadow-lg shadow-brand-500/25"
+                className="text-sm font-medium px-4 py-2 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 text-white transition-opacity shadow-lg shadow-brand-500/25"
               >
                 Get Started Free
               </button>
@@ -144,11 +144,11 @@ export default function Navbar() {
         {/* Top: logo + close */}
         <div className="flex items-center justify-between h-12">
           <Link to="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
               <Zap size={16} className="text-white" />
             </div>
             <span className="text-white font-semibold text-lg tracking-tight">
-              Project<span className="text-brand-400">Pilot</span>
+              Project<span className="duo-text">Pilot</span>
             </span>
           </Link>
           <button onClick={() => setMenuOpen(false)} className="text-slate-400 p-1.5" aria-label="Close menu">
@@ -189,14 +189,14 @@ export default function Navbar() {
           {user ? (
             <button
               onClick={() => { navigate('/generate'); setMenuOpen(false); }}
-              className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-brand-500/30 transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 text-white font-semibold py-4 rounded-full shadow-lg shadow-brand-500/30 transition-opacity"
             >
               Generate <ArrowRight size={18} />
             </button>
           ) : (
             <button
               onClick={() => { setShowAuth(true); setMenuOpen(false); }}
-              className="w-full flex items-center justify-center bg-brand-500 hover:bg-brand-600 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-brand-500/30 transition-colors"
+              className="w-full flex items-center justify-center bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 text-white font-semibold py-4 rounded-full shadow-lg shadow-brand-500/30 transition-opacity"
             >
               Get Started Free
             </button>

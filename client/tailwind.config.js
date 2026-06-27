@@ -4,24 +4,34 @@ export default {
   theme: {
     extend: {
       colors: {
+        // brand = the violet primary; accent = the pink used in the duotone
+        // gradient (brand -> accent). Shifted from the old indigo for the
+        // "Bold Editorial" direction.
         brand: {
-          50:  '#eef2ff',
-          100: '#e0e7ff',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
+          50:  '#f1eeff',
+          100: '#e4ddff',
+          400: '#9b87ff',
+          500: '#7c5cff',
+          600: '#6a45f5',
+        },
+        accent: {
+          400: '#ff7db0',
+          500: '#ff5d9e',
+          600: '#f43f8e',
         },
         surface: {
-          DEFAULT: '#0d0d14',
+          DEFAULT: '#08080f',
           card:    '#13131f',
-          border:  '#1e1e2e',
+          border:  '#20202e',
         },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
-        'hero-glow': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99,102,241,0.18), transparent)',
+        'hero-glow': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124,92,255,0.18), transparent)',
+        'hero-duo': 'radial-gradient(circle at 22% -10%, rgba(124,92,255,0.30), transparent 45%), radial-gradient(circle at 82% 0%, rgba(255,93,158,0.22), transparent 45%)',
       },
     },
   },

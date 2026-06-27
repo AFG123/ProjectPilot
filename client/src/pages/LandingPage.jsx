@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Zap, ArrowRight, Sparkles, Target, FileText, Shield, CheckCircle, ChevronDown, ChevronUp, Layers } from 'lucide-react';
+import { Zap, ArrowRight, Sparkles, Target, CheckCircle, FileText, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from '../components/AuthModal';
 
@@ -30,34 +30,47 @@ function Reveal({ children, delay = 0 }) {
   );
 }
 
+// Kept in sync with the FAQPage JSON-LD in index.html so the rich-result data
+// matches what users actually read.
 const faqs = [
-  { q: 'Do I need to create an account to use it?', a: 'No — you can generate all 5 project ideas without signing up. Create a free account to save your results and claim your first full project deep dive (build plan, code & interview prep) free.' },
-  { q: 'How is this different from asking ChatGPT?', a: 'ProjectPilot is built specifically for placement-seeking students. It factors in your exact skill level, target company culture, and realistic build time — giving you actionable projects, not generic ideas.' },
-  { q: 'Are the project ideas unique every time?', a: 'Yes. The AI generates fresh suggestions on every request. Same skills + different role = completely different projects.' },
-  { q: 'Can I use this for off-campus applications too?', a: 'Absolutely. Whether you\'re targeting product companies, service companies, or startups — just enter your target role and the AI tailors suggestions accordingly.' },
+  { q: 'Is ProjectPilot free?', a: 'Yes — generating 5 tailored project ideas is always free, and your first full build plan is free too. You only pay ₹49 (one-time) if you want to unlock every build plan after that.' },
+  { q: 'What exactly do I get for ₹49?', a: 'A one-time ₹49 payment permanently unlocks unlimited deep-dive build plans — setup, step-by-step build order, code snippets, common mistakes, and interview questions — for every project you generate. It\'s not a subscription; you never pay again.' },
+  { q: 'Who is it for?', a: 'Indian CS/IT students preparing for campus placements or off-campus drives — final-year students and freshers who need strong, finishable portfolio projects that match the roles they\'re applying for.' },
+  { q: 'What kind of projects does it suggest?', a: 'Real, role-relevant projects scoped to your skill level and time — never generic todo, weather, or calculator clones. Each idea is something you can actually finish and explain confidently in an interview.' },
 ];
 
 function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-surface-border rounded-xl overflow-hidden">
+    <div className="border border-white/[0.08] rounded-2xl overflow-hidden bg-white/[0.03]">
       <button
-        className="w-full flex items-center justify-between px-5 py-4 text-left"
+        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
         onClick={() => setOpen(!open)}
       >
-        <span className="text-sm font-medium text-white">{q}</span>
-        {open ? <ChevronUp size={16} className="text-slate-500 flex-shrink-0" /> : <ChevronDown size={16} className="text-slate-500 flex-shrink-0" />}
+        <span className="font-display text-base font-semibold text-white">{q}</span>
+        {open ? <ChevronUp size={18} className="text-slate-500 flex-shrink-0" /> : <ChevronDown size={18} className="text-slate-500 flex-shrink-0" />}
       </button>
-      {open && <div className="px-5 pb-4 text-sm text-slate-400 leading-relaxed">{a}</div>}
+      {open && <div className="px-6 pb-5 text-sm text-slate-400 leading-relaxed">{a}</div>}
     </div>
   );
 }
+
+// shared styles
+const eyebrow = 'text-xs font-semibold uppercase tracking-[0.12em] text-brand-400 text-center mb-3';
+const sectionH2 = 'font-display text-3xl sm:text-4xl font-bold text-white text-center tracking-tight leading-tight';
+const cardBase = 'rounded-2xl bg-white/[0.03] border border-white/[0.08] p-7';
+const pillPrimary = 'inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 text-white font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-brand-500/30';
+const freeTag = 'inline-block mt-3 text-[11px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full';
 
 export default function LandingPage() {
   const { user } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    document.title = 'ProjectPilot — Resume Project Ideas & Build Plans for CS Students';
+  }, []);
 
   // When the navbar sends us here to reach a section (from another route),
   // scroll to it once this page has mounted, then clear the state so a refresh
@@ -72,152 +85,72 @@ export default function LandingPage() {
   function handleCTA() {
     navigate('/generate');
   }
+  function scrollTo(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
 
   return (
     <div className="min-h-screen bg-surface">
       {/* ─── HERO ─── */}
-      <section className="relative pt-32 pb-20 px-4 overflow-hidden">
-        {/* Glow */}
-        <div className="absolute inset-0 bg-hero-glow pointer-events-none" />
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
-
+      <section className="relative pt-32 pb-24 px-4 overflow-hidden">
+        <div className="absolute inset-0 bg-hero-duo pointer-events-none" />
         <div className="relative max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-400 text-xs font-medium mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-500/40 bg-brand-500/10 text-brand-100 text-[11px] font-semibold uppercase tracking-[0.09em] mb-7">
             <Sparkles size={12} />
-            AI-powered project ideas for campus placements
+            For Indian CS &amp; IT students · Placements 2026
           </div>
 
-          {/* Headline */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] mb-6">
-            <span className="text-white">Stand out in</span>
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-[66px] font-bold tracking-tight leading-[1.03] mb-6">
+            <span className="text-white">Resume project ideas that</span>
             <br />
-            <span className="gradient-text">every placement round</span>
+            <span className="duo-text">get you placed</span>
           </h1>
 
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-10">
-            Enter your skills and target role. Get 5 specific, recruiter-approved project ideas
-            tailored to your profile — not the generic todo apps everyone else builds.
+          <p className="text-lg text-slate-300/90 max-w-2xl mx-auto leading-relaxed mb-9">
+            ProjectPilot is an <span className="text-white font-medium">AI placement mentor</span> for CS students.
+            Enter your skills and target role and get <span className="text-white font-medium">5 portfolio projects
+            worth building</span> — each matched to real job descriptions — plus a step-by-step plan to finish the one
+            you pick and defend it in interviews.
           </p>
 
-          {/* CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={handleCTA}
-              className="group flex items-center gap-2 px-6 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50"
-            >
-              Generate My Projects
+            <button onClick={handleCTA} className={`group ${pillPrimary}`}>
+              Generate my projects
               <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
-            <span className="text-xs text-slate-500">Free to start · No credit card</span>
+            <button onClick={() => scrollTo('how-it-works')} className="px-7 py-4 rounded-full border border-white/15 text-white font-medium hover:bg-white/5 transition-colors">
+              See how it works
+            </button>
           </div>
 
-          {/* Stats */}
-          <div className="mt-16 grid grid-cols-3 gap-6 max-w-lg mx-auto">
-            {[
-              { val: '5', label: 'project ideas' },
-              { val: '30s', label: 'generation time' },
-              { val: '100%', label: 'tailored to you' },
-            ].map(({ val, label }) => (
-              <div key={label} className="text-center">
-                <div className="text-2xl font-bold text-white">{val}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── PREVIEW CARD ─── */}
-      <section className="px-4 pb-24">
-        <div className="max-w-3xl mx-auto">
-          <div className="glass-card rounded-2xl p-6 glow-border">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-3 h-3 rounded-full bg-red-500/70" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-              <div className="w-3 h-3 rounded-full bg-green-500/70" />
-              <span className="ml-2 text-xs text-slate-600">projectpilot.ai/generate</span>
-            </div>
-            <div className="space-y-3">
-              {[
-                { name: 'Real-time Collaborative Code Review Tool', stack: 'React · WebSockets · Node.js', diff: 'Medium', time: '2 weeks' },
-                { name: 'AI-Powered Resume Parser & Job Matcher', stack: 'Python · NLP · React · FastAPI', diff: 'Hard', time: '3 weeks' },
-              ].map((p) => (
-                <div key={p.name} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-brand-500/30 transition-colors">
-                  <div>
-                    <p className="text-sm font-medium text-white">{p.name}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{p.stack}</p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-brand-500/15 text-brand-400">{p.diff}</span>
-                    <span className="text-xs text-slate-500">{p.time}</span>
-                  </div>
-                </div>
-              ))}
-              {/* More ideas — all free, blurred just for the preview */}
-              {[3, 4, 5].map((n) => (
-                <div key={n} className="relative rounded-xl border border-white/[0.05] bg-white/[0.02] overflow-hidden">
-                  <div className="p-4 blur-2xl opacity-20 pointer-events-none select-none" aria-hidden="true">
-                    <p className="text-sm font-medium text-white">Project idea #{n}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">React · Node.js · PostgreSQL · Express</p>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                    <span className="text-xs font-medium text-brand-400 bg-brand-500/10 border border-brand-500/30 px-3 py-1 rounded-full flex items-center gap-1.5">
-                      <Sparkles size={10} /> All 5 ideas, free
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <p className="mt-7 text-sm text-slate-500">
+            Free to start &nbsp;·&nbsp; No card needed &nbsp;·&nbsp;
+            <span className="text-slate-300 font-medium"> Built by a CS student, for CS students</span>
+          </p>
         </div>
       </section>
 
       {/* ─── HOW IT WORKS ─── */}
       <section id="how-it-works" className="py-24 px-4 border-t border-surface-border">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-brand-400 text-sm font-medium mb-3">Simple process</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">From skills to projects in 30 seconds</h2>
-          </div>
+          <p className={eyebrow}>How it works</p>
+          <h2 className={sectionH2}>From blank GitHub to interview-ready</h2>
+          <p className="text-center text-slate-400 max-w-xl mx-auto mt-4 mb-14 leading-relaxed">
+            Three steps. The first two are completely free — you only pay if you want the full build plans.
+          </p>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-3 gap-5">
             {[
-              {
-                step: '01',
-                icon: <Target size={20} className="text-brand-400" />,
-                title: 'Enter your profile',
-                desc: 'Add your skills with proficiency levels, target role, dream company, and available time.',
-              },
-              {
-                step: '02',
-                icon: <Sparkles size={20} className="text-brand-400" />,
-                title: 'AI crafts your projects',
-                desc: 'Our AI analyzes your profile against what top recruiters look for and generates 5 tailored ideas.',
-              },
-              {
-                step: '03',
-                icon: <Layers size={20} className="text-brand-400" />,
-                title: 'Deep dive into any idea',
-                desc: 'Open a project to get a full build plan — folder structure, step-by-step order, API routes, DB schema, common mistakes & interview questions.',
-              },
-              {
-                step: '04',
-                icon: <FileText size={20} className="text-brand-400" />,
-                title: 'Build & get hired',
-                desc: 'Follow the plan, ship it to GitHub, and walk into interviews ready to defend every decision.',
-              },
-            ].map((item, i) => (
-              <Reveal key={item.step} delay={i * 120}>
-                <div className="glass-card rounded-2xl p-6 h-full group hover:border-brand-500/30 hover:-translate-y-1 transition-all duration-300">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center group-hover:bg-brand-500/20 group-hover:scale-110 transition-all duration-300">
-                      {item.icon}
-                    </div>
-                    <span className="text-4xl font-bold text-white/[0.04] group-hover:text-brand-500/20 transition-colors duration-300">{item.step}</span>
-                  </div>
-                  <h3 className="text-base font-semibold text-white mb-2">{item.title}</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">{item.desc}</p>
+              { n: '1', title: 'Tell us about you', desc: "Your skills, their level, and the role you're targeting — or upload your resume and we'll read them off it automatically.", tag: null },
+              { n: '2', title: 'Get 5 buildable ideas', desc: 'Tailored to what recruiters actually screen for in that role — never generic todo, weather, or calculator apps.', tag: 'All 5 free' },
+              { n: '3', title: 'Unlock the build plan', desc: 'Setup commands, build order, code snippets for the tricky parts, common mistakes, and likely interview questions.', tag: 'First plan free' },
+            ].map((s, i) => (
+              <Reveal key={s.n} delay={i * 120}>
+                <div className={`${cardBase} h-full`}>
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500/40 to-accent-500/30 flex items-center justify-center font-display font-bold text-white mb-5">{s.n}</div>
+                  <h3 className="font-display text-lg font-semibold text-white mb-2">{s.title}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">{s.desc}</p>
+                  {s.tag && <span className={freeTag}>{s.tag}</span>}
                 </div>
               </Reveal>
             ))}
@@ -225,31 +158,25 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── FEATURES ─── */}
+      {/* ─── WHY ─── */}
       <section className="py-24 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-brand-400 text-sm font-medium mb-3">Why ProjectPilot</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">Built for Indian placement season</h2>
-            <p className="text-slate-400 mt-4 max-w-lg mx-auto">Every feature is designed to help Tier-2 and Tier-3 college students compete with IITians on the strength of their portfolio.</p>
-          </div>
+          <p className={eyebrow}>Why ProjectPilot</p>
+          <h2 className={sectionH2}>Projects that actually move the needle</h2>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-3 gap-5 mt-14">
             {[
-              { icon: <Target size={18} />, title: 'Company-aware suggestions', desc: 'Tell us your dream company. We tailor projects to what their recruiters value.' },
-              { icon: <Shield size={18} />, title: 'Skill-level matched', desc: 'No impossible projects. Every idea is calibrated to your current expertise.' },
-              { icon: <Sparkles size={18} />, title: 'Recruiter rationale', desc: 'Know exactly why each project impresses hiring managers before you build it.' },
-              { icon: <FileText size={18} />, title: 'Interview-ready prep', desc: 'Every deep dive includes likely interview questions on your project, so you can defend it with confidence.' },
-              { icon: <Zap size={18} />, title: 'Instant results', desc: 'No waiting. 5 tailored project ideas generated in under 30 seconds.' },
-              { icon: <CheckCircle size={18} />, title: 'Save & revisit', desc: 'Save your generations. Come back and compare options before you decide.' },
-            ].map((f) => (
-              <div key={f.title} className="p-5 rounded-xl glass-card hover:border-white/10 transition-all group">
-                <div className="w-8 h-8 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 mb-4 group-hover:bg-brand-500/20 transition-colors">
-                  {f.icon}
+              { icon: <Target size={20} />, title: 'Matched to your role', desc: 'Built around real job descriptions for your target role, so every project shows exactly what hiring managers screen for.' },
+              { icon: <CheckCircle size={20} />, title: 'Actually finishable', desc: 'Scoped to your skill level and time, so it ends up complete on your resume — not abandoned half-built on GitHub.' },
+              { icon: <FileText size={20} />, title: 'From idea to interview', desc: 'The build plan walks you through making it and prepares you to defend every line of code when they ask.' },
+            ].map((f, i) => (
+              <Reveal key={f.title} delay={i * 120}>
+                <div className={`${cardBase} h-full`}>
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500/30 to-accent-500/20 flex items-center justify-center text-brand-100 mb-5">{f.icon}</div>
+                  <h3 className="font-display text-lg font-semibold text-white mb-2">{f.title}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
                 </div>
-                <h3 className="text-sm font-semibold text-white mb-1">{f.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">{f.desc}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -258,55 +185,48 @@ export default function LandingPage() {
       {/* ─── PRICING ─── */}
       <section id="pricing" className="py-24 px-4 border-t border-surface-border">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-brand-400 text-sm font-medium mb-3">Simple pricing</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">Less than a chai. More than a placement.</h2>
-          </div>
+          <p className={eyebrow}>Pricing</p>
+          <h2 className={sectionH2}>Simple, honest pricing</h2>
+          <p className="text-center text-slate-400 max-w-md mx-auto mt-4 mb-14 leading-relaxed">
+            No subscription. Start free, and pay once only if the build plans are worth it to you.
+          </p>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-5 max-w-3xl mx-auto">
             {/* Free */}
-            <div className="glass-card rounded-2xl p-6">
-              <p className="text-sm font-medium text-slate-400 mb-1">Free</p>
-              <div className="flex items-end gap-1 mb-4">
-                <span className="text-4xl font-bold text-white">₹0</span>
-              </div>
-              <ul className="space-y-3 mb-6">
-                {['All 5 tailored project ideas', '1 full project deep dive — free', 'No login needed to generate'].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-slate-400">
-                    <CheckCircle size={14} className="text-slate-600" />
-                    {f}
+            <div className={cardBase}>
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-2">Free</p>
+              <div className="font-display text-4xl font-bold text-white mb-1">₹0</div>
+              <p className="text-sm text-slate-500 mb-6">Everything you need to start</p>
+              <ul className="space-y-3 mb-7">
+                {['5 tailored project ideas, every time', 'Skill-gap analysis for your role', 'Resume skill extraction', 'Your first full build plan'].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-slate-300">
+                    <Check size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" /> {f}
                   </li>
                 ))}
               </ul>
-              <button onClick={handleCTA} className="w-full py-2.5 rounded-xl border border-surface-border text-sm font-medium text-white hover:bg-white/5 transition-colors">
+              <button onClick={handleCTA} className="w-full py-3 rounded-full border border-white/15 text-sm font-semibold text-white hover:bg-white/5 transition-colors">
                 Try for free
               </button>
             </div>
 
-            {/* Pro */}
-            <div className="relative rounded-2xl p-6 bg-gradient-to-b from-brand-500/20 to-brand-600/5 border border-brand-500/40">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-brand-500 text-white text-xs font-medium">
-                Most popular
-              </div>
-              <p className="text-sm font-medium text-brand-400 mb-1">Lifetime unlock</p>
-              <div className="flex items-end gap-1 mb-1">
-                <span className="text-4xl font-bold text-white">₹49</span>
-                <span className="text-slate-400 text-sm mb-1.5">one-time</span>
-              </div>
-              <p className="text-xs text-slate-500 mb-4">Pay once · unlock forever</p>
-              <ul className="space-y-3 mb-6">
-                {['Unlimited full project deep dives', 'Step-by-step build plans + code', 'Interview questions per project', 'Company-targeted suggestions', 'Save & revisit history'].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-white">
-                    <CheckCircle size={14} className="text-brand-400" />
-                    {f}
+            {/* Paid */}
+            <div className="relative rounded-2xl p-7 bg-gradient-to-b from-brand-500/[0.16] to-accent-500/[0.08] border border-brand-500/40">
+              <span className="absolute -top-3 right-6 text-[11px] font-bold text-white bg-gradient-to-r from-brand-500 to-accent-500 px-3 py-1 rounded-full">ONE-TIME</span>
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-300 mb-2">Full access</p>
+              <div className="font-display text-4xl font-bold text-white mb-1">₹49</div>
+              <p className="text-sm text-slate-400 mb-6">Pay once, unlocks forever</p>
+              <ul className="space-y-3 mb-7">
+                {[['Everything in Free', false], ['Unlimited full build plans', true], ['Every project you generate, forever', false], ['No subscription, no renewals', false]].map(([f, bold]) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-white">
+                    <Check size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" /> <span className={bold ? 'font-semibold' : ''}>{f}</span>
                   </li>
                 ))}
               </ul>
               <button
                 onClick={() => (user ? navigate('/generate') : setShowAuth(true))}
-                className="w-full py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-sm font-semibold text-white transition-colors shadow-lg shadow-brand-500/25"
+                className="w-full py-3 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 text-sm font-semibold text-white hover:opacity-90 transition-opacity shadow-lg shadow-brand-500/25"
               >
-                Get started
+                Unlock for ₹49
               </button>
             </div>
           </div>
@@ -314,11 +234,10 @@ export default function LandingPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="py-24 px-4 border-t border-surface-border">
+      <section id="faq" className="py-24 px-4 border-t border-surface-border">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white">Frequently asked</h2>
-          </div>
+          <p className={eyebrow}>FAQ</p>
+          <h2 className={`${sectionH2} mb-12`}>Questions, answered</h2>
           <div className="space-y-3">
             {faqs.map((f) => <FaqItem key={f.q} q={f.q} a={f.a} />)}
           </div>
@@ -326,18 +245,14 @@ export default function LandingPage() {
       </section>
 
       {/* ─── FINAL CTA ─── */}
-      <section className="py-24 px-4 border-t border-surface-border">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Your next project idea is<br />
-            <span className="gradient-text">30 seconds away.</span>
+      <section className="px-4 pb-24">
+        <div className="max-w-4xl mx-auto rounded-3xl px-6 py-14 text-center bg-gradient-to-r from-brand-500 to-accent-500">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">
+            Your next resume project is one click away
           </h2>
-          <p className="text-slate-400 mb-8">Join students who stopped building generic projects and started building careers.</p>
-          <button
-            onClick={handleCTA}
-            className="group inline-flex items-center gap-2 px-6 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/30"
-          >
-            Generate My Projects
+          <p className="text-white/85 mb-8">Generate 5 tailored ideas free — no card needed to look.</p>
+          <button onClick={handleCTA} className="group inline-flex items-center gap-2 px-7 py-4 rounded-full bg-surface text-white font-semibold hover:bg-black transition-colors">
+            Get started free
             <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
           </button>
         </div>
@@ -347,12 +262,12 @@ export default function LandingPage() {
       <footer className="border-t border-surface-border py-8 px-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center">
               <Zap size={12} className="text-white" />
             </div>
-            <span className="text-sm font-medium text-white">Project<span className="text-brand-400">Pilot</span></span>
+            <span className="text-sm font-medium text-white">Project<span className="duo-text">Pilot</span></span>
           </div>
-          <p className="text-xs text-slate-600">© 2026 ProjectPilot. Built for Indian placement warriors.</p>
+          <p className="text-xs text-slate-600">© 2026 ProjectPilot · Built for Indian placement season.</p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link to="/privacy" className="text-xs text-slate-600 hover:text-slate-400 transition-colors">Privacy</Link>
             <Link to="/terms" className="text-xs text-slate-600 hover:text-slate-400 transition-colors">Terms</Link>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +8,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    background-color: #0d0d14;
+    background-color: #08080f;
     color: #e2e8f0;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -16,8 +16,16 @@
 }
 
 @layer utilities {
+  /* white -> violet -> pink, for headlines that fade into the duotone */
   .gradient-text {
-    background: linear-gradient(135deg, #fff 0%, #818cf8 50%, #a78bfa 100%);
+    background: linear-gradient(135deg, #fff 0%, #9b87ff 50%, #ff5d9e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  /* the pure brand->accent duotone (no white), for highlighted words */
+  .duo-text {
+    background: linear-gradient(135deg, #7c5cff 0%, #ff5d9e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
