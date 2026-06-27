@@ -35,6 +35,8 @@ export default function SavedPage() {
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState(null);
 
+  useEffect(() => { document.title = 'My Projects · ProjectPilot'; }, []);
+
   useEffect(() => {
     // Wait for the cookie-based auth check to finish before deciding.
     if (authLoading) return;
@@ -75,7 +77,7 @@ export default function SavedPage() {
           <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors mb-6">
             <Zap size={12} /> ProjectPilot
           </Link>
-          <h1 className="text-3xl font-bold text-white">My Projects</h1>
+          <h1 className="font-display text-3xl font-bold text-white tracking-tight">My Projects</h1>
           <p className="text-slate-400 mt-1.5 text-sm">Your past generations — pick up where you left off.</p>
         </div>
 
@@ -102,14 +104,14 @@ export default function SavedPage() {
 
         {!loading && !error && generations.length === 0 && (
           <div className="glass-card rounded-2xl p-12 text-center border-dashed">
-            <div className="w-12 h-12 rounded-xl bg-brand-500/10 flex items-center justify-center mx-auto mb-4">
-              <Zap size={22} className="text-brand-400" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500/30 to-accent-500/20 flex items-center justify-center mx-auto mb-4">
+              <Zap size={22} className="text-brand-100" />
             </div>
             <p className="text-sm font-medium text-white mb-1">No saved generations yet</p>
             <p className="text-xs text-slate-500 mb-4">Generate your first set of project ideas to see them here.</p>
             <Link
               to="/generate"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 hover:opacity-90 text-white text-sm font-medium rounded-full transition-opacity"
             >
               Generate projects <ArrowRight size={14} />
             </Link>
@@ -126,8 +128,8 @@ export default function SavedPage() {
                   className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-white/[0.02] transition-colors"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-brand-500/10 flex items-center justify-center flex-shrink-0">
-                      <Briefcase size={16} className="text-brand-400" />
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500/30 to-accent-500/20 flex items-center justify-center flex-shrink-0">
+                      <Briefcase size={16} className="text-brand-100" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-white truncate">{gen.target_role}</p>
@@ -172,7 +174,7 @@ export default function SavedPage() {
                         className="rounded-xl border border-surface-border bg-surface hover:border-brand-500/40 transition-all cursor-pointer group p-4"
                       >
                         <div className="flex items-start justify-between gap-3 mb-2">
-                          <h3 className="text-sm font-semibold text-white leading-snug group-hover:text-brand-400 transition-colors">{p.name}</h3>
+                          <h3 className="font-display text-base font-semibold text-white leading-snug group-hover:text-brand-400 transition-colors">{p.name}</h3>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             {/* Unlock status — so they jump straight to the open one */}
                             {unlocked ? (
