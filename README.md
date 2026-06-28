@@ -54,3 +54,58 @@ skill level, *your* target role, and what actually gets you hired.
 ---
 
 ## Project Structure
+.
+
+├── server.js
+├── scripts/init-db.js          # idempotent schema setup
+└── src/
+├── app.js                  # middleware, CORS, routes
+├── db.js                   # pg Pool (Neon)
+├── controllers/            # auth, generate, deepDive, payment, resume
+├── routes/
+├── services/               # aiService (Gemini), resumeService
+├── middleware/             # JWT auth, CSRF
+└── utils/
+└── client/                     # React + Vite
+└── src/
+├── pages/              # Landing, Generate, DeepDive, Saved
+├── components/
+└── context/            # AuthContext
+---
+
+## Running locally
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL (or free [Neon](https://neon.tech) project)
+- Google OAuth client ID, Gemini API key, Razorpay keys
+
+```bash
+# Backend
+npm install
+cp .env.example .env
+node scripts/init-db.js
+npm run dev                  # http://localhost:3000
+
+# Frontend
+cd client
+npm install
+cp .env.example .env
+npm run dev                  # http://localhost:5173
+```
+
+See `.env.example` for all required environment variables.
+
+---
+
+## Deployment
+
+- **Backend** → Railway (`NODE_ENV=production`)
+- **Frontend** → Cloudflare Workers (SPA routing via `not_found_handling: single-page-application`)
+- **Payments** → Register Razorpay webhook `payment.captured` → `POST /api/payment/webhook`
+
+---
+
+## License
+
+ISC
