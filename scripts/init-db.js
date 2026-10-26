@@ -24,6 +24,14 @@ async function main() {
 
   console.log('✓ payments table ready');
 
+  // Ensure users table supports credential-based accounts as well
+  await pool.query(`
+    ALTER TABLE users ALTER COLUMN google_sub DROP NOT NULL;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
+    CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users(lower(email));
+  `);
+  console.log('✓ users table credential support ready');
+
   // Global response cache for the 5-ideas generation. Keyed by a sha256 of the
   // NORMALIZED inputs (skills+levels, role, company, time), shared across ALL
   // users so identical requests reuse one Gemini call instead of paying for it

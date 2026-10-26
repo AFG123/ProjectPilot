@@ -1,8 +1,139 @@
 const { OAuth2Client } = require('google-auth-library');
+const bcrypt = require('bcrypt');
+const { validationResult } = require('express-validator');
 const pool = require('../db');
 const { signAuthToken, setAuthCookie, clearAuthCookie } = require('../utils/auth');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// POST /api/auth/register — creates a new account using email and password
+async function register(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
+  }
+
+  const { email, password } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+
+  // Extract username automatically from everything before the '@'
+  const username = normalizedEmail.split('@')[0]?.trim();
+  if (!username) {
+    return res.status(400).json({ error: 'Invalid email address format' });
+  }
+
+  try {
+    // Check if account already exists
+    const existing = await pool.query(
+      'SELECT id, google_sub, password_hash FROM users WHERE lower(email) = $1',
+      [normalizedEmail]
+    );
+
+    if (existing.rows.length > 0) {
+      if (!existing.rows[0].password_hash && existing.rows[0].google_sub) {
+        return res.status(400).json({
+          error: 'This email is already registered via Google. Please sign in with Google.',
+        });
+      }
+      return res.status(400).json({ error: 'An account with this email already exists.' });
+    }
+
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    const { rows } = await pool.query(
+      `INSERT INTO users (name, email, password_hash)
+       VALUES ($1, $2, $3)
+       RETURNING id, is_paid`,
+      [username, normalizedEmail, passwordHash]
+    );
+
+    const { id: userId, is_paid: isPaid } = rows[0];
+
+    // Issue JWT cookie so the user is immediately signed in after registration
+    const token = signAuthToken({
+      sub: null,
+      userId,
+      name: username,
+      email: normalizedEmail,
+      picture: null,
+      isPaid: !!isPaid,
+    });
+    setAuthCookie(res, token);
+
+    return res.status(201).json({
+      user: {
+        name: username,
+        email: normalizedEmail,
+        picture: null,
+        isPaid: !!isPaid,
+      },
+    });
+  } catch (err) {
+    console.error('Registration error:', err.message);
+    return res.status(500).json({ error: 'Failed to create account. Please try again.' });
+  }
+}
+
+// POST /api/auth/login — authenticates existing users with email and password
+async function login(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
+  }
+
+  const { email, password } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, name, email, picture, password_hash, is_paid, google_sub
+       FROM users
+       WHERE lower(email) = $1`,
+      [normalizedEmail]
+    );
+
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    const user = rows[0];
+
+    // Account created with Google only (no local password set)
+    if (!user.password_hash) {
+      return res.status(400).json({
+        error: 'This account was registered using Google. Please click "Continue with Google".',
+      });
+    }
+
+    const matches = await bcrypt.compare(password, user.password_hash);
+    if (!matches) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    const token = signAuthToken({
+      sub: user.google_sub || null,
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      picture: user.picture,
+      isPaid: !!user.is_paid,
+    });
+    setAuthCookie(res, token);
+
+    return res.json({
+      user: {
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        isPaid: !!user.is_paid,
+      },
+    });
+  } catch (err) {
+    console.error('Login error:', err.message);
+    return res.status(500).json({ error: 'Failed to sign in. Please try again.' });
+  }
+}
 
 async function googleAuth(req, res) {
   const { credential } = req.body;
@@ -72,4 +203,4 @@ function logout(req, res) {
   return res.json({ ok: true });
 }
 
-module.exports = { googleAuth, me, logout };
+module.exports = { register, login, googleAuth, me, logout };

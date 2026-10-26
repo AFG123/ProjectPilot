@@ -36,10 +36,47 @@ export function AuthProvider({ children }) {
       credentials: 'include', // let the browser store the cookie the server sets
       body: JSON.stringify({ credential }),
     });
-    if (!res.ok) throw new Error('Authentication failed');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Authentication failed');
+    }
     const data = await res.json();
     clearLocalCaches(); // drop any previous user's cached data on this browser
     setUser(data.user); // includes isPaid from DB; cookie already set by server
+    return data.user;
+  }
+
+  async function registerWithCredentials(email, password) {
+    const res = await fetch(`${API}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Registration failed');
+    }
+    const data = await res.json();
+    clearLocalCaches();
+    setUser(data.user);
+    return data.user;
+  }
+
+  async function loginWithCredentials(email, password) {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Login failed');
+    }
+    const data = await res.json();
+    clearLocalCaches();
+    setUser(data.user);
     return data.user;
   }
 
@@ -60,7 +97,17 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout, setPaidUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        loginWithGoogle,
+        registerWithCredentials,
+        loginWithCredentials,
+        logout,
+        setPaidUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
