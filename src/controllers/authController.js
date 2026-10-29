@@ -135,6 +135,7 @@ async function login(req, res) {
   }
 }
 
+// POST /api/auth/google — verifies Google ID token and creates or links account
 async function googleAuth(req, res) {
   const { credential } = req.body;
   if (!credential) return res.status(400).json({ error: 'Google credential required' });
@@ -146,26 +147,70 @@ async function googleAuth(req, res) {
     });
 
     const { sub, name, email, picture } = ticket.getPayload();
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
-    // Upsert: create user on first login, update name/picture on repeat logins.
-    // is_paid stays unchanged on conflict — only the payment flow flips it.
-    const { rows } = await pool.query(
-      `INSERT INTO users (google_sub, name, email, picture)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (google_sub) DO UPDATE
-         SET name = EXCLUDED.name, picture = EXCLUDED.picture
-       RETURNING id, is_paid`,
-      [sub, name, email, picture]
+    // Check if account already exists by either google_sub or email
+    const { rows: existing } = await pool.query(
+      `SELECT id, name, email, picture, is_paid, google_sub, password_hash
+       FROM users
+       WHERE google_sub = $1 OR lower(email) = $2
+       LIMIT 1`,
+      [sub, normalizedEmail]
     );
 
-    const { id: userId, is_paid: isPaid } = rows[0];
+    let userId, isPaid, userName, userPicture;
+
+    if (existing.length > 0) {
+      const user = existing[0];
+      userId = user.id;
+      isPaid = user.is_paid;
+      userName = user.name || name;
+      userPicture = picture || user.picture;
+
+      // Link Google account to this existing user (updates google_sub and profile picture)
+      // Preserves existing password_hash, payment status, and history
+      await pool.query(
+        `UPDATE users
+         SET google_sub = $1,
+             picture = COALESCE($2, picture),
+             name = COALESCE(name, $3)
+         WHERE id = $4`,
+        [sub, picture, name, userId]
+      );
+    } else {
+      // First-time sign-up via Google
+      const { rows: inserted } = await pool.query(
+        `INSERT INTO users (google_sub, name, email, picture)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, is_paid`,
+        [sub, name, normalizedEmail, picture]
+      );
+      userId = inserted[0].id;
+      isPaid = inserted[0].is_paid;
+      userName = name;
+      userPicture = picture;
+    }
 
     // Token goes into an httpOnly cookie — never returned in the body, so the
     // frontend can't (and doesn't need to) touch it.
-    const token = signAuthToken({ sub, userId, name, email, picture, isPaid });
+    const token = signAuthToken({
+      sub,
+      userId,
+      name: userName,
+      email: normalizedEmail,
+      picture: userPicture,
+      isPaid: !!isPaid,
+    });
     setAuthCookie(res, token);
 
-    return res.json({ user: { name, email, picture, isPaid } });
+    return res.json({
+      user: {
+        name: userName,
+        email: normalizedEmail,
+        picture: userPicture,
+        isPaid: !!isPaid,
+      },
+    });
   } catch (err) {
     console.error('Google auth error:', err.message);
     return res.status(401).json({ error: 'Invalid Google token' });
